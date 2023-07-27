@@ -1,0 +1,11 @@
+[package]
+name = "host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+methods = { path = "../methods" }
+risc0-zkvm = { version = "0.16.0" }
+serde = "1.0"
+ed25519-dalek = {version = "2.0.0-rc.3", default-features = false, features = ["rand_core", "alloc"]}
+rand = {version = "0.8", default-features = false, features = ["getrandom"]}
