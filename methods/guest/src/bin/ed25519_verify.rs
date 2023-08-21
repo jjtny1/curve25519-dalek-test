@@ -24,11 +24,19 @@ pub fn main() {
     let signature: Signature = Signature::from_slice(&signature_bytes).unwrap();
 
     // Verify the signature, panicking if verification fails.
-    black_box(verify(verifying_key, &message, signature));
+    black_box(verify(
+        black_box(verifying_key),
+        black_box(&message),
+        black_box(signature),
+    ));
 
     let start = env::get_cycle_count();
 
-    black_box(verify(verifying_key, &message, signature));
+    black_box(verify(
+        black_box(verifying_key),
+        black_box(&message),
+        black_box(signature),
+    ));
 
     let end = env::get_cycle_count();
     println!("Verification: {} cycles", end - start);

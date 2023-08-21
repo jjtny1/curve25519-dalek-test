@@ -63,49 +63,111 @@ fn bench<T>(name: &str, func: impl Fn() -> T) {
 // }
 
 /// Benchmark operations in the secp256k1 scalar field.
-fn benchmark_scalar() {
+fn benchmark_scalar_add() {
     println!("");
     println!("Scalar operations:");
-    let x = black_box(Scalar::from_bytes_mod_order(
+    let x = Scalar::from_bytes_mod_order(
         U256::from_be_bytes(hex!(
             "2A3F714FCDDEA4984F228C4D1DBD41A79B470B1546C68F6BB268A04AA0394BAC"
         ))
         .to_le_bytes(),
-    ));
-    let y = black_box(Scalar::from_bytes_mod_order(
+    );
+    let y = Scalar::from_bytes_mod_order(
         U256::from_be_bytes(hex!(
             "98973615F3B819529D885BBED9A69BC66A678D00289A8B1F3A0FF19801C10CDD"
         ))
         .to_le_bytes(),
-    ));
+    );
 
-    bench("add", || x + y);
-    bench("mul", || x * y);
-    bench("square", || x * x);
-    bench("negate", || -x);
-    bench("invert", || x.invert());
+    bench("add", || black_box(x) + black_box(y));
+    // bench("mul", || black_box(x) * black_box(y));
+    // bench("square", || black_box(x) * black_box(x));
+    // bench("negate", || -black_box(x));
+    // bench("invert", || black_box(x).invert());
+}
+
+fn benchmark_scalar_mul() {
+    println!("");
+    println!("Scalar operations:");
+    let x = Scalar::from_bytes_mod_order(
+        U256::from_be_bytes(hex!(
+            "2A3F714FCDDEA4984F228C4D1DBD41A79B470B1546C68F6BB268A04AA0394BAC"
+        ))
+        .to_le_bytes(),
+    );
+    let y = Scalar::from_bytes_mod_order(
+        U256::from_be_bytes(hex!(
+            "98973615F3B819529D885BBED9A69BC66A678D00289A8B1F3A0FF19801C10CDD"
+        ))
+        .to_le_bytes(),
+    );
+
+    bench("mul", || black_box(x) * black_box(y));
+}
+
+fn benchmark_scalar_square() {
+    println!("");
+    println!("Scalar operations:");
+    let x = Scalar::from_bytes_mod_order(
+        U256::from_be_bytes(hex!(
+            "2A3F714FCDDEA4984F228C4D1DBD41A79B470B1546C68F6BB268A04AA0394BAC"
+        ))
+        .to_le_bytes(),
+    );
+
+    bench("square", || black_box(x) * black_box(x));
+}
+
+fn benchmark_scalar_negate() {
+    println!("");
+    println!("Scalar operations:");
+    let x = Scalar::from_bytes_mod_order(
+        U256::from_be_bytes(hex!(
+            "2A3F714FCDDEA4984F228C4D1DBD41A79B470B1546C68F6BB268A04AA0394BAC"
+        ))
+        .to_le_bytes(),
+    );
+
+    bench("negate", || -black_box(x));
+}
+
+fn benchmark_scalar_invert() {
+    println!("");
+    println!("Scalar operations:");
+    let x = Scalar::from_bytes_mod_order(
+        U256::from_be_bytes(hex!(
+            "2A3F714FCDDEA4984F228C4D1DBD41A79B470B1546C68F6BB268A04AA0394BAC"
+        ))
+        .to_le_bytes(),
+    );
+
+    bench("invert", || black_box(x).invert());
 }
 
 /// Benchmark secp256k1 elliptic curve group operations.
 fn benchmark_group() {
     println!("");
     println!("Group operations:");
-    let x = black_box(Scalar::from_bytes_mod_order(
+    let x = Scalar::from_bytes_mod_order(
         U256::from_be_bytes(hex!(
             "2a3f714fcddea4984f228c4d1dbd41a79b470b1546c68f6bb268a04aa0394bac"
         ))
         .to_le_bytes(),
-    ));
-    let y = black_box(Scalar::from_bytes_mod_order(
+    );
+    let y = Scalar::from_bytes_mod_order(
         U256::from_be_bytes(hex!(
             "2a3f714fcddea4984f228c4d1dbd41a79b470b1546c68f6bb268a04aa0394bac"
         ))
         .to_le_bytes(),
-    ));
+    );
 
     // NOTE: Accounts for >95% of the total cycle count for ECDSA verification.
     bench("vartime_double_scalar_mul_basepoint", || {
-        EdwardsPoint::vartime_double_scalar_mul_basepoint(&x, &ED25519_BASEPOINT_POINT, &y);
+        EdwardsPoint::vartime_double_scalar_mul_basepoint(
+            black_box(&x),
+            black_box(&ED25519_BASEPOINT_POINT),
+            black_box(&y),
+        );
     });
 }
 
@@ -113,6 +175,11 @@ risc0_zkvm::guest::entry!(main);
 
 fn main() {
     // benchmark_field();
-    benchmark_scalar();
+    benchmark_scalar_add();
+    benchmark_scalar_mul();
+    benchmark_scalar_square();
+    benchmark_scalar_negate();
+    benchmark_scalar_invert();
+    //black_box(benchmark_scalar_mul());
     benchmark_group();
 }
